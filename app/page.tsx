@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { 
   Plus, 
@@ -66,6 +66,44 @@ export default function JobTracker() {
   });
   
   const [entries, setEntries] = useState<JobEntry[]>([]);
+  const storageKey = 'job_tracker_entries';
+  const [formData, setFormData] = useState({
+    resource: 'Vendor' as ResourceType,
+    source: 'Indeed' as SourceType,
+    name: '',
+    position: 'AI Engineer' as PositionType,
+    email: '',
+    phone: '',
+    date: '',
+    invitationLink: '',
+    remarks: 'Applied' as RemarkType,
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    console.log('Attempting to load from localStorage');
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as JobEntry[];
+      if (Array.isArray(parsed)) {
+        setEntries(parsed);
+        console.log(`Loaded ${parsed.length} entries from localStorage`);
+      }
+    } catch (error) {
+      console.error('Failed to load entries from localStorage', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(entries));
+      console.log('Saved entries to localStorage');
+    } catch (error) {
+      console.error('Failed to save entries to localStorage', error);
+    }
+  }, [entries]);
   
   const formatDateDisplay = (dateStr: string) => {
     try {
@@ -76,7 +114,7 @@ export default function JobTracker() {
   };
 
   // Filtering and Sorting Logic
-  const filteredAndSortedEntries = React.useMemo(() => {
+  const filteredAndSortedEntries = useMemo(() => {
     let result = [...entries];
 
     // Search Filter
@@ -171,7 +209,48 @@ export default function JobTracker() {
   };
 
   const resetForm = () => {
-    // Reset form state if needed
+    setFormData({
+      resource: 'Vendor',
+      source: 'Indeed',
+      name: '',
+      position: 'AI Engineer',
+      email: '',
+      phone: '',
+      date: '',
+      invitationLink: '',
+      remarks: 'Applied',
+    });
+  };
+
+  const handleFormChange = (
+    field: keyof typeof formData,
+    value: string
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmedName = formData.name.trim();
+    if (!trimmedName) {
+      alert('Name is required.');
+      return;
+    }
+    const newEntry: JobEntry = {
+      id: crypto.randomUUID(),
+      resource: formData.resource,
+      source: formData.source,
+      name: trimmedName,
+      position: formData.position,
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      date: formData.date || new Date().toISOString().split('T')[0],
+      invitationLink: formData.invitationLink.trim(),
+      remarks: formData.remarks,
+    };
+    setEntries(prev => [newEntry, ...prev]);
+    resetForm();
+    setIsFormOpen(false);
   };
   
   // Predefined options
@@ -426,56 +505,102 @@ export default function JobTracker() {
               </button>
             </div>
             
-            <form className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleFormSubmit}>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Resource Type</label>
-                <select className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <select
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.resource}
+                  onChange={(e) => handleFormChange('resource', e.target.value)}
+                >
                   {resourceOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Source</label>
-                <select className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <select
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.source}
+                  onChange={(e) => handleFormChange('source', e.target.value)}
+                >
                   {sourceOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Name</label>
-                <input type="text" placeholder="John Doe" className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.name}
+                  onChange={(e) => handleFormChange('name', e.target.value)}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Position</label>
-                <select className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <select
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.position}
+                  onChange={(e) => handleFormChange('position', e.target.value)}
+                >
                   {positionOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Email</label>
-                <input type="email" placeholder="john@example.com" className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input
+                  type="email"
+                  placeholder="john@example.com"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.email}
+                  onChange={(e) => handleFormChange('email', e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Phone Number</label>
-                <input type="tel" placeholder="+1 234 567 890" className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input
+                  type="tel"
+                  placeholder="+1 234 567 890"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.phone}
+                  onChange={(e) => handleFormChange('phone', e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Date</label>
-                <input type="date" className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input
+                  type="date"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Invitation Link</label>
-                <input type="url" placeholder="https://..." className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.invitationLink}
+                  onChange={(e) => handleFormChange('invitationLink', e.target.value)}
+                />
               </div>
 
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-semibold text-gray-700">Remarks</label>
-                <select className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <select
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.remarks}
+                  onChange={(e) => handleFormChange('remarks', e.target.value)}
+                >
                   {remarkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
