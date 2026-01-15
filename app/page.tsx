@@ -13,19 +13,23 @@ import {
   Briefcase, 
   Building2, 
   Globe,
-  ChevronDown,
   X,
   Trash2,
   Edit2,
-  ExternalLink,
   Upload,
   Download
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 // Types for our Job Tracker
-type ResourceType = 'Vendor' | 'Company';
+type TypeOption = 'Vendor' | 'Company';
 type SourceType = 'Indeed' | 'Glassdoor' | 'Linkedin' | 'Company webpage' | 'Vendor webpage';
+type JobType =
+  | 'Full Time - Hybrid'
+  | 'Contract - Hybrid'
+  | 'Part time'
+  | 'Full Time - Remote'
+  | 'Contract - Remote';
 type PositionType = 
   | 'AI Engineer' 
   | 'AI Developer' 
@@ -43,10 +47,11 @@ type RemarkType = 'Applied' | 'For Future Positions' | 'Followup' | 'Rejected';
 
 interface JobEntry {
   id: string;
-  resource: ResourceType;
+  type: TypeOption;
   source: SourceType;
-  name: string;
+  companyName: string;
   position: PositionType;
+  jobType: JobType;
   email: string;
   phone: string;
   date: string;
@@ -56,8 +61,9 @@ interface JobEntry {
 
 export default function JobTracker() {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterResource, setFilterResource] = useState<string>('');
+  const [filterType, setFilterType] = useState<string>('');
   const [filterPosition, setFilterPosition] = useState<string>('');
   const [filterRemarks, setFilterRemarks] = useState<string>('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof JobEntry; direction: 'asc' | 'desc' }>({
@@ -68,10 +74,11 @@ export default function JobTracker() {
   const [entries, setEntries] = useState<JobEntry[]>([]);
   const storageKey = 'job_tracker_entries';
   const [formData, setFormData] = useState({
-    resource: 'Vendor' as ResourceType,
+    type: 'Vendor' as TypeOption,
     source: 'Indeed' as SourceType,
-    name: '',
+    companyName: '',
     position: 'AI Engineer' as PositionType,
+    jobType: 'Full Time - Hybrid' as JobType,
     email: '',
     phone: '',
     date: '',
@@ -87,8 +94,21 @@ export default function JobTracker() {
       if (!stored) return;
       const parsed = JSON.parse(stored) as JobEntry[];
       if (Array.isArray(parsed)) {
-        setEntries(parsed);
-        console.log(`Loaded ${parsed.length} entries from localStorage`);
+        const normalized = parsed.map((entry: any) => ({
+          id: entry.id || crypto.randomUUID(),
+          type: entry.type || entry.resource || 'Company',
+          source: entry.source || 'Linkedin',
+          companyName: entry.companyName || entry.name || 'Unknown',
+          position: entry.position || 'AI Engineer',
+          jobType: entry.jobType || 'Full Time - Hybrid',
+          email: entry.email || '',
+          phone: entry.phone || '',
+          date: entry.date || new Date().toISOString().split('T')[0],
+          invitationLink: entry.invitationLink || '',
+          remarks: entry.remarks || 'Applied',
+        })) as JobEntry[];
+        setEntries(normalized);
+        console.log(`Loaded ${normalized.length} entries from localStorage`);
       }
     } catch (error) {
       console.error('Failed to load entries from localStorage', error);
@@ -121,7 +141,7 @@ export default function JobTracker() {
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
       result = result.filter(entry => 
-        entry.name.toLowerCase().includes(lowerSearch) ||
+        entry.companyName.toLowerCase().includes(lowerSearch) ||
         entry.email.toLowerCase().includes(lowerSearch) ||
         entry.phone.toLowerCase().includes(lowerSearch) ||
         entry.position.toLowerCase().includes(lowerSearch)
@@ -129,8 +149,8 @@ export default function JobTracker() {
     }
 
     // Dropdown Filters
-    if (filterResource) {
-      result = result.filter(entry => entry.resource === filterResource);
+    if (filterType) {
+      result = result.filter(entry => entry.type === filterType);
     }
     if (filterPosition) {
       result = result.filter(entry => entry.position === filterPosition);
@@ -154,7 +174,7 @@ export default function JobTracker() {
     });
 
     return result;
-  }, [entries, searchTerm, filterResource, filterPosition, filterRemarks, sortConfig]);
+  }, [entries, searchTerm, filterType, filterPosition, filterRemarks, sortConfig]);
 
   const handleSort = (key: keyof JobEntry) => {
     setSortConfig(prev => ({
@@ -178,10 +198,11 @@ export default function JobTracker() {
 
         const newEntries: JobEntry[] = data.map((row: any) => ({
           id: crypto.randomUUID(),
-          resource: (row.Resource || row.resource || 'Company') as ResourceType,
+          type: (row.Type || row.type || row.Resource || row.resource || 'Company') as TypeOption,
           source: (row.Source || row.source || 'Linkedin') as SourceType,
-          name: (row.Name || row.name || 'Unknown'),
+          companyName: (row.Company || row.company || row['Company Name'] || row.companyName || row.Name || row.name || 'Unknown'),
           position: (row.Position || row.position || 'AI Engineer') as PositionType,
+          jobType: (row['Job Type'] || row.jobType || 'Full Time - Hybrid') as JobType,
           email: (row.Email || row.email || ''),
           phone: (row.Phone || row.phone || ''),
           date: row.Date || row.date || new Date().toISOString().split('T')[0],
@@ -210,16 +231,23 @@ export default function JobTracker() {
 
   const resetForm = () => {
     setFormData({
-      resource: 'Vendor',
+      type: 'Vendor',
       source: 'Indeed',
-      name: '',
+      companyName: '',
       position: 'AI Engineer',
+      jobType: 'Full Time - Hybrid',
       email: '',
       phone: '',
       date: '',
       invitationLink: '',
       remarks: 'Applied',
     });
+  };
+
+  const closeForm = () => {
+    resetForm();
+    setEditingEntryId(null);
+    setIsFormOpen(false);
   };
 
   const handleFormChange = (
@@ -231,35 +259,76 @@ export default function JobTracker() {
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const trimmedName = formData.name.trim();
-    if (!trimmedName) {
-      alert('Name is required.');
+    const trimmedCompanyName = formData.companyName.trim();
+    if (!trimmedCompanyName) {
+      alert('Company/End Client is required.');
       return;
     }
-    const newEntry: JobEntry = {
-      id: crypto.randomUUID(),
-      resource: formData.resource,
+    const baseEntry = {
+      type: formData.type,
       source: formData.source,
-      name: trimmedName,
+      companyName: trimmedCompanyName,
       position: formData.position,
+      jobType: formData.jobType,
       email: formData.email.trim(),
       phone: formData.phone.trim(),
       date: formData.date || new Date().toISOString().split('T')[0],
       invitationLink: formData.invitationLink.trim(),
       remarks: formData.remarks,
     };
-    setEntries(prev => [newEntry, ...prev]);
+    if (editingEntryId) {
+      setEntries(prev => prev.map(entry => (
+        entry.id === editingEntryId ? { ...entry, ...baseEntry } : entry
+      )));
+    } else {
+      const newEntry: JobEntry = {
+        id: crypto.randomUUID(),
+        ...baseEntry,
+      };
+      setEntries(prev => [newEntry, ...prev]);
+    }
     resetForm();
+    setEditingEntryId(null);
     setIsFormOpen(false);
+  };
+
+  const handleEditEntry = (entry: JobEntry) => {
+    setEditingEntryId(entry.id);
+    setFormData({
+      type: entry.type,
+      source: entry.source,
+      companyName: entry.companyName,
+      position: entry.position,
+      jobType: entry.jobType,
+      email: entry.email,
+      phone: entry.phone,
+      date: entry.date,
+      invitationLink: entry.invitationLink,
+      remarks: entry.remarks,
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteEntry = (entryId: string) => {
+    const confirmed = window.confirm('Delete this entry? This cannot be undone.');
+    if (!confirmed) return;
+    setEntries(prev => prev.filter(entry => entry.id !== entryId));
   };
   
   // Predefined options
-  const resourceOptions: ResourceType[] = ['Vendor', 'Company'];
+  const typeOptions: TypeOption[] = ['Vendor', 'Company'];
   const sourceOptions: SourceType[] = ['Indeed', 'Glassdoor', 'Linkedin', 'Company webpage', 'Vendor webpage'];
   const positionOptions: PositionType[] = [
     'AI Engineer', 'AI Developer', 'Data Analyst', 'Data Scientist', 
     'Gen AI Engineer', 'Gen AI Developer', 'ML Engineer', 'ML Developer', 
     'MLOps Engineer', 'LLMOps Engineer', 'Python Developer', 'Data Engineer'
+  ];
+  const jobTypeOptions: JobType[] = [
+    'Full Time - Hybrid',
+    'Contract - Hybrid',
+    'Part time',
+    'Full Time - Remote',
+    'Contract - Remote',
   ];
   const remarkOptions: RemarkType[] = ['Applied', 'For Future Positions', 'Followup', 'Rejected'];
 
@@ -288,7 +357,7 @@ export default function JobTracker() {
               <span>Export</span>
             </button>
             <button 
-              onClick={() => { resetForm(); setIsFormOpen(true); }}
+              onClick={() => { resetForm(); setEditingEntryId(null); setIsFormOpen(true); }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-sm"
             >
               <Plus size={20} />
@@ -305,7 +374,7 @@ export default function JobTracker() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
-              placeholder="Search by name, email, or position..." 
+              placeholder="Search by company, email, or position..." 
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -314,12 +383,12 @@ export default function JobTracker() {
           
           <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
             <select 
-              value={filterResource}
-              onChange={(e) => setFilterResource(e.target.value)}
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
               className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
             >
-              <option value="">All Resources</option>
-              {resourceOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              <option value="">All Types</option>
+              {typeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
             <select 
               value={filterPosition}
@@ -337,11 +406,11 @@ export default function JobTracker() {
               <option value="">All Status</option>
               {remarkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
-            {(searchTerm || filterResource || filterPosition || filterRemarks) && (
+            {(searchTerm || filterType || filterPosition || filterRemarks) && (
               <button 
                 onClick={() => {
                   setSearchTerm('');
-                  setFilterResource('');
+                  setFilterType('');
                   setFilterPosition('');
                   setFilterRemarks('');
                 }}
@@ -362,26 +431,26 @@ export default function JobTracker() {
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('resource')}
+                    onClick={() => handleSort('type')}
                   >
                     <div className="flex items-center gap-1">
-                      Resource {sortConfig.key === 'resource' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      Type / Source {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('source')}
+                    onClick={() => handleSort('jobType')}
                   >
                     <div className="flex items-center gap-1">
-                      Source {sortConfig.key === 'source' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      Job Type {sortConfig.key === 'jobType' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('name')}
+                    onClick={() => handleSort('companyName')}
                   >
                     <div className="flex items-center gap-1">
-                      Name / Position {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      Company / Position {sortConfig.key === 'companyName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
                   <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
@@ -410,18 +479,21 @@ export default function JobTracker() {
                     <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          {entry.resource === 'Company' ? (
+                          {entry.type === 'Company' ? (
                             <Building2 className="w-4 h-4 text-gray-400" />
                           ) : (
                             <Globe className="w-4 h-4 text-gray-400" />
                           )}
-                          <span className="text-sm font-medium text-gray-900">{entry.resource}</span>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{entry.type}</p>
+                            <p className="text-sm text-gray-500">{entry.source}</p>
+                          </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{entry.source}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{entry.jobType}</td>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{entry.name}</p>
+                          <p className="text-sm font-medium text-gray-900">{entry.companyName}</p>
                           <p className="text-sm text-gray-500">{entry.position}</p>
                         </div>
                       </td>
@@ -470,8 +542,19 @@ export default function JobTracker() {
                               <LinkIcon size={16} />
                             </a>
                           )}
-                          <button className="text-gray-400 hover:text-gray-600" title="Edit Entry">
-                            <ChevronDown size={16} />
+                          <button
+                            className="text-gray-400 hover:text-gray-600"
+                            title="Edit Entry"
+                            onClick={() => handleEditEntry(entry)}
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            className="text-gray-400 hover:text-red-600"
+                            title="Delete Entry"
+                            onClick={() => handleDeleteEntry(entry.id)}
+                          >
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -499,21 +582,23 @@ export default function JobTracker() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h2 className="text-xl font-bold text-gray-900">Add New Job Entry</h2>
-              <button onClick={() => setIsFormOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <h2 className="text-xl font-bold text-gray-900">
+                {editingEntryId ? 'Edit Job Entry' : 'Add New Job Entry'}
+              </h2>
+              <button onClick={closeForm} className="text-gray-400 hover:text-gray-600">
                 <X size={24} />
               </button>
             </div>
             
             <form className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleFormSubmit}>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Resource Type</label>
+                <label className="text-sm font-semibold text-gray-700">Type</label>
                 <select
                   className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={formData.resource}
-                  onChange={(e) => handleFormChange('resource', e.target.value)}
+                  value={formData.type}
+                  onChange={(e) => handleFormChange('type', e.target.value)}
                 >
-                  {resourceOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  {typeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
 
@@ -529,13 +614,13 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Name</label>
+                <label className="text-sm font-semibold text-gray-700">Company / End Client</label>
                 <input
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Company or end client name"
                   className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={formData.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
+                  value={formData.companyName}
+                  onChange={(e) => handleFormChange('companyName', e.target.value)}
                   required
                 />
               </div>
@@ -548,6 +633,17 @@ export default function JobTracker() {
                   onChange={(e) => handleFormChange('position', e.target.value)}
                 >
                   {positionOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Job Type</label>
+                <select
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.jobType}
+                  onChange={(e) => handleFormChange('jobType', e.target.value)}
+                >
+                  {jobTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
 
@@ -608,7 +704,7 @@ export default function JobTracker() {
               <div className="md:col-span-2 pt-4 flex gap-3">
                 <button 
                   type="button"
-                  onClick={() => setIsFormOpen(false)}
+                  onClick={closeForm}
                   className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
@@ -617,7 +713,7 @@ export default function JobTracker() {
                   type="submit"
                   className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
                 >
-                  Save Entry
+                  {editingEntryId ? 'Update Entry' : 'Save Entry'}
                 </button>
               </div>
             </form>
