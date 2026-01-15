@@ -11,8 +11,6 @@ import {
   Calendar, 
   Link as LinkIcon, 
   Briefcase, 
-  Building2, 
-  Globe,
   X,
   Trash2,
   Edit2,
@@ -49,7 +47,9 @@ interface JobEntry {
   id: string;
   type: TypeOption;
   source: SourceType;
+  fullName: string;
   companyName: string;
+  endClient: string;
   position: PositionType;
   jobType: JobType;
   email: string;
@@ -76,7 +76,9 @@ export default function JobTracker() {
   const [formData, setFormData] = useState({
     type: 'Vendor' as TypeOption,
     source: 'Indeed' as SourceType,
+    fullName: '',
     companyName: '',
+    endClient: '',
     position: 'AI Engineer' as PositionType,
     jobType: 'Full Time - Hybrid' as JobType,
     email: '',
@@ -98,7 +100,9 @@ export default function JobTracker() {
           id: entry.id || crypto.randomUUID(),
           type: entry.type || entry.resource || 'Company',
           source: entry.source || 'Linkedin',
-          companyName: entry.companyName || entry.name || 'Unknown',
+          fullName: entry.fullName || entry.name || '',
+          companyName: entry.companyName || entry.company || '',
+          endClient: entry.endClient || '',
           position: entry.position || 'AI Engineer',
           jobType: entry.jobType || 'Full Time - Hybrid',
           email: entry.email || '',
@@ -141,7 +145,9 @@ export default function JobTracker() {
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
       result = result.filter(entry => 
+        entry.fullName.toLowerCase().includes(lowerSearch) ||
         entry.companyName.toLowerCase().includes(lowerSearch) ||
+        entry.endClient.toLowerCase().includes(lowerSearch) ||
         entry.email.toLowerCase().includes(lowerSearch) ||
         entry.phone.toLowerCase().includes(lowerSearch) ||
         entry.position.toLowerCase().includes(lowerSearch)
@@ -200,7 +206,9 @@ export default function JobTracker() {
           id: crypto.randomUUID(),
           type: (row.Type || row.type || row.Resource || row.resource || 'Company') as TypeOption,
           source: (row.Source || row.source || 'Linkedin') as SourceType,
-          companyName: (row.Company || row.company || row['Company Name'] || row.companyName || row.Name || row.name || 'Unknown'),
+          fullName: (row['Full Name'] || row.fullName || row.Name || row.name || ''),
+          companyName: (row.Company || row.company || row['Company Name'] || row.companyName || ''),
+          endClient: (row.EndClient || row['End Client'] || row.endClient || ''),
           position: (row.Position || row.position || 'AI Engineer') as PositionType,
           jobType: (row['Job Type'] || row.jobType || 'Full Time - Hybrid') as JobType,
           email: (row.Email || row.email || ''),
@@ -233,7 +241,9 @@ export default function JobTracker() {
     setFormData({
       type: 'Vendor',
       source: 'Indeed',
+      fullName: '',
       companyName: '',
+      endClient: '',
       position: 'AI Engineer',
       jobType: 'Full Time - Hybrid',
       email: '',
@@ -259,15 +269,22 @@ export default function JobTracker() {
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const trimmedFullName = formData.fullName.trim();
     const trimmedCompanyName = formData.companyName.trim();
+    if (!trimmedFullName) {
+      alert('Full name is required.');
+      return;
+    }
     if (!trimmedCompanyName) {
-      alert('Company/End Client is required.');
+      alert('Company is required.');
       return;
     }
     const baseEntry = {
       type: formData.type,
       source: formData.source,
+      fullName: trimmedFullName,
       companyName: trimmedCompanyName,
+      endClient: formData.endClient.trim(),
       position: formData.position,
       jobType: formData.jobType,
       email: formData.email.trim(),
@@ -297,7 +314,9 @@ export default function JobTracker() {
     setFormData({
       type: entry.type,
       source: entry.source,
+      fullName: entry.fullName,
       companyName: entry.companyName,
+      endClient: entry.endClient,
       position: entry.position,
       jobType: entry.jobType,
       email: entry.email,
@@ -374,7 +393,7 @@ export default function JobTracker() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
-              placeholder="Search by company, email, or position..." 
+              placeholder="Search by full name, company, or position..." 
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -431,10 +450,10 @@ export default function JobTracker() {
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('type')}
+                    onClick={() => handleSort('fullName')}
                   >
                     <div className="flex items-center gap-1">
-                      Type / Source {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      Company / End Client {sortConfig.key === 'companyName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
                   <th 
@@ -450,7 +469,7 @@ export default function JobTracker() {
                     onClick={() => handleSort('companyName')}
                   >
                     <div className="flex items-center gap-1">
-                      Company / Position {sortConfig.key === 'companyName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      Full Name / Position {sortConfig.key === 'fullName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
                   <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
@@ -478,16 +497,9 @@ export default function JobTracker() {
                   filteredAndSortedEntries.map((entry) => (
                     <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          {entry.type === 'Company' ? (
-                            <Building2 className="w-4 h-4 text-gray-400" />
-                          ) : (
-                            <Globe className="w-4 h-4 text-gray-400" />
-                          )}
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{entry.type}</p>
-                            <p className="text-sm text-gray-500">{entry.source}</p>
-                          </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{entry.fullName}</p>
+                          <p className="text-sm text-gray-500">{entry.endClient || '—'}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{entry.jobType}</td>
@@ -614,13 +626,13 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Company / End Client</label>
+                <label className="text-sm font-semibold text-gray-700">Full Name</label>
                 <input
                   type="text"
-                  placeholder="Company or end client name"
+                  placeholder="John Doe"
                   className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={formData.companyName}
-                  onChange={(e) => handleFormChange('companyName', e.target.value)}
+                  value={formData.fullName}
+                  onChange={(e) => handleFormChange('fullName', e.target.value)}
                   required
                 />
               </div>
@@ -634,6 +646,29 @@ export default function JobTracker() {
                 >
                   {positionOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Company</label>
+                <input
+                  type="text"
+                  placeholder="Company name"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.companyName}
+                  onChange={(e) => handleFormChange('companyName', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">End Client</label>
+                <input
+                  type="text"
+                  placeholder="End client name"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.endClient}
+                  onChange={(e) => handleFormChange('endClient', e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
