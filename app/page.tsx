@@ -340,7 +340,8 @@ export default function JobTracker() {
   const positionOptions: PositionType[] = [
     'AI Engineer', 'AI Developer', 'Data Analyst', 'Data Scientist', 
     'Gen AI Engineer', 'Gen AI Developer', 'ML Engineer', 'ML Developer', 
-    'MLOps Engineer', 'LLMOps Engineer', 'Python Developer', 'Data Engineer'
+    'MLOps Engineer', 'LLMOps Engineer', 'Python Developer', 'Data Engineer',
+    'DevOps Engineer', 'Agentic AI role', 'Back End Engineer', 'Software Engineer'
   ];
   const jobTypeOptions: JobType[] = [
     'Full Time - Hybrid',
