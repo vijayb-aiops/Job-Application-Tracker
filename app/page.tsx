@@ -450,7 +450,7 @@ export default function JobTracker() {
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('fullName')}
+                    onClick={() => handleSort('companyName')}
                   >
                     <div className="flex items-center gap-1">
                       Company / End Client {sortConfig.key === 'companyName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
@@ -466,7 +466,7 @@ export default function JobTracker() {
                   </th>
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('companyName')}
+                    onClick={() => handleSort('fullName')}
                   >
                     <div className="flex items-center gap-1">
                       Full Name / Position {sortConfig.key === 'fullName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
@@ -498,14 +498,14 @@ export default function JobTracker() {
                     <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{entry.fullName}</p>
+                          <p className="text-sm font-medium text-gray-900">{entry.companyName}</p>
                           <p className="text-sm text-gray-500">{entry.endClient || '—'}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{entry.jobType}</td>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{entry.companyName}</p>
+                          <p className="text-sm font-medium text-gray-900">{entry.fullName}</p>
                           <p className="text-sm text-gray-500">{entry.position}</p>
                         </div>
                       </td>
