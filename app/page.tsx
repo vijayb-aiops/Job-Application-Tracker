@@ -131,7 +131,11 @@ export default function JobTracker() {
   
   const formatDateDisplay = (dateStr: string) => {
     try {
-      return format(new Date(dateStr), 'MMM-dd-yyyy');
+      if (!dateStr) return dateStr;
+      const [year, month, day] = dateStr.split('-').map(Number);
+      if (!year || !month || !day) return dateStr;
+      const localDate = new Date(year, month - 1, day);
+      return format(localDate, 'MMM-dd-yyyy');
     } catch (e) {
       return dateStr;
     }
@@ -350,7 +354,7 @@ export default function JobTracker() {
     'Full Time - Remote',
     'Contract - Remote',
   ];
-  const remarkOptions: RemarkType[] = ['Applied', 'For Future Positions', 'Followup', 'Rejected'];
+  const remarkOptions: RemarkType[] = ['Applied', 'Submitted-Resume', 'For Future Positions', 'Followup', 'Rejected'];
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
