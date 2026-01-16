@@ -50,12 +50,14 @@ interface JobEntry {
   fullName: string;
   companyName: string;
   endClient: string;
+  location: string;
   position: PositionType;
   jobType: JobType;
   email: string;
   phone: string;
   date: string;
   invitationLink: string;
+  interviewTime: string;
   remarks: RemarkType;
 }
 
@@ -79,12 +81,14 @@ export default function JobTracker() {
     fullName: '',
     companyName: '',
     endClient: '',
+    location: '',
     position: 'AI Engineer' as PositionType,
     jobType: 'Full Time - Hybrid' as JobType,
     email: '',
     phone: '',
     date: '',
     invitationLink: '',
+    interviewTime: '',
     remarks: 'Applied' as RemarkType,
   });
 
@@ -103,12 +107,14 @@ export default function JobTracker() {
           fullName: entry.fullName || entry.name || '',
           companyName: entry.companyName || entry.company || '',
           endClient: entry.endClient || '',
+          location: entry.location || '',
           position: entry.position || 'AI Engineer',
           jobType: entry.jobType || 'Full Time - Hybrid',
           email: entry.email || '',
           phone: entry.phone || '',
           date: entry.date || new Date().toISOString().split('T')[0],
           invitationLink: entry.invitationLink || '',
+          interviewTime: entry.interviewTime || '',
           remarks: entry.remarks || 'Applied',
         })) as JobEntry[];
         setEntries(normalized);
@@ -141,6 +147,18 @@ export default function JobTracker() {
     }
   };
 
+  const storageUsage = useMemo(() => {
+    try {
+      const serialized = JSON.stringify(entries);
+      const bytes = new TextEncoder().encode(serialized).length;
+      return { bytes, kb: Math.ceil(bytes / 1024) };
+    } catch {
+      return { bytes: 0, kb: 0 };
+    }
+  }, [entries]);
+
+  const storageWarning = storageUsage.bytes > 4.5 * 1024 * 1024;
+
   // Filtering and Sorting Logic
   const filteredAndSortedEntries = useMemo(() => {
     let result = [...entries];
@@ -152,6 +170,7 @@ export default function JobTracker() {
         entry.fullName.toLowerCase().includes(lowerSearch) ||
         entry.companyName.toLowerCase().includes(lowerSearch) ||
         entry.endClient.toLowerCase().includes(lowerSearch) ||
+        entry.location.toLowerCase().includes(lowerSearch) ||
         entry.email.toLowerCase().includes(lowerSearch) ||
         entry.phone.toLowerCase().includes(lowerSearch) ||
         entry.position.toLowerCase().includes(lowerSearch)
@@ -213,12 +232,14 @@ export default function JobTracker() {
           fullName: (row['Full Name'] || row.fullName || row.Name || row.name || ''),
           companyName: (row.Company || row.company || row['Company Name'] || row.companyName || ''),
           endClient: (row.EndClient || row['End Client'] || row.endClient || ''),
+          location: (row.Location || row.location || ''),
           position: (row.Position || row.position || 'AI Engineer') as PositionType,
           jobType: (row['Job Type'] || row.jobType || 'Full Time - Hybrid') as JobType,
           email: (row.Email || row.email || ''),
           phone: (row.Phone || row.phone || ''),
           date: row.Date || row.date || new Date().toISOString().split('T')[0],
           invitationLink: row.InvitationLink || row.invitationLink || '',
+          interviewTime: row['Interview Time'] || row.interviewTime || '',
           remarks: (row.Remarks || row.remarks || 'Applied') as RemarkType,
         }));
 
@@ -248,12 +269,14 @@ export default function JobTracker() {
       fullName: '',
       companyName: '',
       endClient: '',
+      location: '',
       position: 'AI Engineer',
       jobType: 'Full Time - Hybrid',
       email: '',
       phone: '',
       date: '',
       invitationLink: '',
+      interviewTime: '',
       remarks: 'Applied',
     });
   };
@@ -289,12 +312,14 @@ export default function JobTracker() {
       fullName: trimmedFullName,
       companyName: trimmedCompanyName,
       endClient: formData.endClient.trim(),
+      location: formData.location,
       position: formData.position,
       jobType: formData.jobType,
       email: formData.email.trim(),
       phone: formData.phone.trim(),
       date: formData.date || new Date().toISOString().split('T')[0],
       invitationLink: formData.invitationLink.trim(),
+      interviewTime: formData.interviewTime,
       remarks: formData.remarks,
     };
     if (editingEntryId) {
@@ -321,12 +346,14 @@ export default function JobTracker() {
       fullName: entry.fullName,
       companyName: entry.companyName,
       endClient: entry.endClient,
+      location: entry.location,
       position: entry.position,
       jobType: entry.jobType,
       email: entry.email,
       phone: entry.phone,
       date: entry.date,
       invitationLink: entry.invitationLink,
+      interviewTime: entry.interviewTime,
       remarks: entry.remarks,
     });
     setIsFormOpen(true);
@@ -354,7 +381,16 @@ export default function JobTracker() {
     'Full Time - Remote',
     'Contract - Remote',
   ];
-  const remarkOptions: RemarkType[] = ['Applied', 'Submitted-Resume', 'For Future Positions', 'Followup', 'Rejected'];
+  const locationOptions = [
+    'Montreal',
+    'Toronto',
+    'Winnipeg',
+    'Waterloo',
+    'Ottawa',
+    'Missisauga',
+    'Vancouver',
+  ];
+  const remarkOptions: RemarkType[] = ['Applied', 'Submitted-Resume', 'Interview-Scheduled', 'For Future Positions', 'Followup', 'Rejected'];
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
@@ -392,6 +428,11 @@ export default function JobTracker() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {storageWarning && (
+          <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
+            Storage warning: you are using about {storageUsage.kb} KB in localStorage. Consider exporting data if it grows large.
+          </div>
+        )}
         {/* Filters & Search */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
           <div className="relative flex-1 min-w-[300px]">
@@ -463,6 +504,14 @@ export default function JobTracker() {
                   </th>
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('location')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Location {sortConfig.key === 'location' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => handleSort('jobType')}
                   >
                     <div className="flex items-center gap-1">
@@ -507,6 +556,7 @@ export default function JobTracker() {
                           <p className="text-sm text-gray-500">{entry.endClient || '—'}</p>
                         </div>
                       </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{entry.location || '—'}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{entry.jobType}</td>
                       <td className="px-6 py-4">
                         <div>
@@ -579,7 +629,7 @@ export default function JobTracker() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                       <div className="flex flex-col items-center gap-2">
                         <Briefcase size={48} className="text-gray-200" />
                         <p className="text-lg font-medium">No entries found</p>
@@ -688,6 +738,18 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Location</label>
+                <select
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.location}
+                  onChange={(e) => handleFormChange('location', e.target.value)}
+                >
+                  <option value="">Select location</option>
+                  {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Email</label>
                 <input
                   type="email"
@@ -727,6 +789,16 @@ export default function JobTracker() {
                   className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   value={formData.invitationLink}
                   onChange={(e) => handleFormChange('invitationLink', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Interview Time</label>
+                <input
+                  type="time"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.interviewTime}
+                  onChange={(e) => handleFormChange('interviewTime', e.target.value)}
                 />
               </div>
 
