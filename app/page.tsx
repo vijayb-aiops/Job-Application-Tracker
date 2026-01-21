@@ -158,6 +158,14 @@ export default function JobTracker() {
   const formatDateDisplay = (dateStr: string) => {
     try {
       if (!dateStr) return dateStr;
+      if (/^\d{5}$/.test(dateStr)) {
+        const excelEpoch = new Date(1899, 11, 30);
+        const excelDays = Number(dateStr);
+        if (!Number.isNaN(excelDays)) {
+          const excelDate = new Date(excelEpoch.getTime() + excelDays * 86400000);
+          return format(excelDate, 'MMM-dd-yyyy');
+        }
+      }
       const [year, month, day] = dateStr.split('-').map(Number);
       if (!year || !month || !day) return dateStr;
       const localDate = new Date(year, month - 1, day);
@@ -248,24 +256,47 @@ export default function JobTracker() {
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws) as any[];
 
-        const newEntries: JobEntry[] = data.map((row: any) => ({
-          id: crypto.randomUUID(),
-          type: (row.Type || row.type || row.Resource || row.resource || 'Company') as TypeOption,
-          source: (row.Source || row.source || 'Linkedin') as SourceType,
-          fullName: (row['Full Name'] || row.fullName || row.Name || row.name || ''),
-          companyName: (row.Company || row.company || row['Company Name'] || row.companyName || ''),
-          endClient: (row.EndClient || row['End Client'] || row.endClient || ''),
-          location: (row.Location || row.location || ''),
-          position: (row.Position || row.position || 'AI Engineer') as PositionType,
-          jobType: (row['Job Type'] || row.jobType || 'Full Time - Hybrid') as JobType,
-          email: (row.Email || row.email || ''),
-          phone: (row.Phone || row.phone || ''),
-          date: row.Date || row.date || new Date().toISOString().split('T')[0],
-          invitationLink: row.InvitationLink || row.invitationLink || '',
-          interviewTime: row['Interview Time'] || row.interviewTime || '',
-          notes: row.Notes || row.notes || '',
-          remarks: (row.Remarks || row.remarks || 'Applied') as RemarkType,
-        }));
+        const newEntries: JobEntry[] = data.map((row: any) => {
+          const rawDate = row.Date || row.date;
+          const normalizedDate = (() => {
+            if (typeof rawDate === 'number') {
+              const excelEpoch = new Date(1899, 11, 30);
+              const excelDate = new Date(excelEpoch.getTime() + rawDate * 86400000);
+              return excelDate.toISOString().split('T')[0];
+            }
+            if (typeof rawDate === 'string') {
+              const trimmed = rawDate.trim();
+              if (/^\d{5}$/.test(trimmed)) {
+                const excelEpoch = new Date(1899, 11, 30);
+                const excelDays = Number(trimmed);
+                if (!Number.isNaN(excelDays)) {
+                  const excelDate = new Date(excelEpoch.getTime() + excelDays * 86400000);
+                  return excelDate.toISOString().split('T')[0];
+                }
+              }
+              return trimmed;
+            }
+            return new Date().toISOString().split('T')[0];
+          })();
+          return ({
+            id: crypto.randomUUID(),
+            type: (row.Type || row.type || row.Resource || row.resource || 'Company') as TypeOption,
+            source: (row.Source || row.source || 'Linkedin') as SourceType,
+            fullName: (row['Full Name'] || row.fullName || row.Name || row.name || ''),
+            companyName: (row.Company || row.company || row['Company Name'] || row.companyName || ''),
+            endClient: (row.EndClient || row['End Client'] || row.endClient || ''),
+            location: (row.Location || row.location || ''),
+            position: (row.Position || row.position || 'AI Engineer') as PositionType,
+            jobType: (row['Job Type'] || row.jobType || 'Full Time - Hybrid') as JobType,
+            email: (row.Email || row.email || ''),
+            phone: (row.Phone || row.phone || ''),
+          date: normalizedDate,
+            invitationLink: row.InvitationLink || row.invitationLink || '',
+            interviewTime: row['Interview Time'] || row.interviewTime || '',
+            notes: row.Notes || row.notes || '',
+            remarks: (row.Remarks || row.remarks || 'Applied') as RemarkType,
+          });
+        });
 
         setEntries(prev => [...newEntries, ...prev]);
         alert(`Successfully imported ${newEntries.length} entries!`);
