@@ -354,10 +354,6 @@ export default function JobTracker() {
     e.preventDefault();
     const trimmedFullName = formData.fullName.trim();
     const trimmedCompanyName = formData.companyName.trim();
-    if (!trimmedFullName) {
-      alert('Full name is required.');
-      return;
-    }
     if (!trimmedCompanyName) {
       alert('Company is required.');
       return;
@@ -606,7 +602,6 @@ export default function JobTracker() {
                     </div>
                   </th>
                   <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Notes</th>
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => handleSort('date')}
@@ -668,7 +663,6 @@ export default function JobTracker() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{entry.notes || '—'}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1 text-sm text-gray-600">
                           <Calendar size={14} />
@@ -718,7 +712,7 @@ export default function JobTracker() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                       <div className="flex flex-col items-center gap-2">
                         <Briefcase size={48} className="text-gray-200" />
                         <p className="text-lg font-medium">No entries found</p>
@@ -777,7 +771,6 @@ export default function JobTracker() {
                   className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   value={formData.fullName}
                   onChange={(e) => handleFormChange('fullName', e.target.value)}
-                  required
                 />
               </div>
 
