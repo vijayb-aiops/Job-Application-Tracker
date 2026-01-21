@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Mail, 
   Phone, 
   Calendar, 
@@ -40,8 +39,25 @@ type PositionType =
   | 'MLOps Engineer' 
   | 'LLMOps Engineer' 
   | 'Python Developer' 
-  | 'Data Engineer';
-type RemarkType = 'Applied' | 'For Future Positions' | 'Followup' | 'Rejected';
+  | 'Data Engineer'
+  | 'DevOps Engineer'
+  | 'Agentic AI role'
+  | 'Back End Engineer'
+  | 'Software Engineer'
+  | 'AI Solutions Developer'
+  | 'Applied AI/ML Engineer'
+  | 'AI Product Engineer'
+  | 'AI Deployment Engineer';
+type RemarkType = 
+  | 'Applied' 
+  | 'Submitted-Resume' 
+  | 'Interview-Scheduled' 
+  | 'Initial Screeing' 
+  | 'Second Round' 
+  | 'Final Round' 
+  | 'For Future Positions' 
+  | 'Followup' 
+  | 'Rejected';
 
 interface JobEntry {
   id: string;
@@ -58,6 +74,7 @@ interface JobEntry {
   date: string;
   invitationLink: string;
   interviewTime: string;
+  notes: string;
   remarks: RemarkType;
 }
 
@@ -68,6 +85,7 @@ export default function JobTracker() {
   const [filterType, setFilterType] = useState<string>('');
   const [filterPosition, setFilterPosition] = useState<string>('');
   const [filterRemarks, setFilterRemarks] = useState<string>('');
+  const [filterDate, setFilterDate] = useState<string>('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof JobEntry; direction: 'asc' | 'desc' }>({
     key: 'date',
     direction: 'desc'
@@ -89,6 +107,7 @@ export default function JobTracker() {
     date: '',
     invitationLink: '',
     interviewTime: '',
+    notes: '',
     remarks: 'Applied' as RemarkType,
   });
 
@@ -115,6 +134,7 @@ export default function JobTracker() {
           date: entry.date || new Date().toISOString().split('T')[0],
           invitationLink: entry.invitationLink || '',
           interviewTime: entry.interviewTime || '',
+          notes: entry.notes || '',
           remarks: entry.remarks || 'Applied',
         })) as JobEntry[];
         setEntries(normalized);
@@ -187,6 +207,9 @@ export default function JobTracker() {
     if (filterRemarks) {
       result = result.filter(entry => entry.remarks === filterRemarks);
     }
+    if (filterDate) {
+      result = result.filter(entry => entry.date === filterDate);
+    }
 
     // Sorting
     result.sort((a, b) => {
@@ -203,7 +226,7 @@ export default function JobTracker() {
     });
 
     return result;
-  }, [entries, searchTerm, filterType, filterPosition, filterRemarks, sortConfig]);
+  }, [entries, searchTerm, filterType, filterPosition, filterRemarks, filterDate, sortConfig]);
 
   const handleSort = (key: keyof JobEntry) => {
     setSortConfig(prev => ({
@@ -240,6 +263,7 @@ export default function JobTracker() {
           date: row.Date || row.date || new Date().toISOString().split('T')[0],
           invitationLink: row.InvitationLink || row.invitationLink || '',
           interviewTime: row['Interview Time'] || row.interviewTime || '',
+          notes: row.Notes || row.notes || '',
           remarks: (row.Remarks || row.remarks || 'Applied') as RemarkType,
         }));
 
@@ -277,6 +301,7 @@ export default function JobTracker() {
       date: '',
       invitationLink: '',
       interviewTime: '',
+      notes: '',
       remarks: 'Applied',
     });
   };
@@ -320,6 +345,7 @@ export default function JobTracker() {
       date: formData.date || new Date().toISOString().split('T')[0],
       invitationLink: formData.invitationLink.trim(),
       interviewTime: formData.interviewTime,
+      notes: formData.notes.trim(),
       remarks: formData.remarks,
     };
     if (editingEntryId) {
@@ -354,6 +380,7 @@ export default function JobTracker() {
       date: entry.date,
       invitationLink: entry.invitationLink,
       interviewTime: entry.interviewTime,
+      notes: entry.notes,
       remarks: entry.remarks,
     });
     setIsFormOpen(true);
@@ -372,7 +399,8 @@ export default function JobTracker() {
     'AI Engineer', 'AI Developer', 'Data Analyst', 'Data Scientist', 
     'Gen AI Engineer', 'Gen AI Developer', 'ML Engineer', 'ML Developer', 
     'MLOps Engineer', 'LLMOps Engineer', 'Python Developer', 'Data Engineer',
-    'DevOps Engineer', 'Agentic AI role', 'Back End Engineer', 'Software Engineer'
+    'DevOps Engineer', 'Agentic AI role', 'Back End Engineer', 'Software Engineer',
+    'AI Solutions Developer', 'Applied AI/ML Engineer', 'AI Product Engineer', 'AI Deployment Engineer'
   ];
   const jobTypeOptions: JobType[] = [
     'Full Time - Hybrid',
@@ -390,7 +418,17 @@ export default function JobTracker() {
     'Missisauga',
     'Vancouver',
   ];
-  const remarkOptions: RemarkType[] = ['Applied', 'Submitted-Resume', 'Interview-Scheduled', 'For Future Positions', 'Followup', 'Rejected'];
+  const remarkOptions: RemarkType[] = [
+    'Applied',
+    'Submitted-Resume',
+    'Interview-Scheduled',
+    'Initial Screeing',
+    'Second Round',
+    'Final Round',
+    'For Future Positions',
+    'Followup',
+    'Rejected',
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
@@ -433,6 +471,9 @@ export default function JobTracker() {
             Storage warning: you are using about {storageUsage.kb} KB in localStorage. Consider exporting data if it grows large.
           </div>
         )}
+        <div className="mb-4 text-sm text-gray-600">
+          Total applications: <span className="font-semibold text-gray-900">{entries.length}</span>
+        </div>
         {/* Filters & Search */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
           <div className="relative flex-1 min-w-[300px]">
@@ -471,13 +512,20 @@ export default function JobTracker() {
               <option value="">All Status</option>
               {remarkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
-            {(searchTerm || filterType || filterPosition || filterRemarks) && (
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+            />
+            {(searchTerm || filterType || filterPosition || filterRemarks || filterDate) && (
               <button 
                 onClick={() => {
                   setSearchTerm('');
                   setFilterType('');
                   setFilterPosition('');
                   setFilterRemarks('');
+                  setFilterDate('');
                 }}
                 className="p-2.5 text-gray-500 hover:text-red-600 transition-colors"
                 title="Clear Filters"
@@ -527,6 +575,7 @@ export default function JobTracker() {
                     </div>
                   </th>
                   <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Notes</th>
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => handleSort('date')}
@@ -566,12 +615,20 @@ export default function JobTracker() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-1">
-                          {entry.email && (
-                            <a href={`mailto:${entry.email}`} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
-                              <Mail size={14} />
-                              {entry.email}
-                            </a>
-                          )}
+                          {entry.email && entry.email.split(',').map((email) => {
+                            const trimmedEmail = email.trim();
+                            if (!trimmedEmail) return null;
+                            return (
+                              <a
+                                key={trimmedEmail}
+                                href={`mailto:${trimmedEmail}`}
+                                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                <Mail size={14} />
+                                {trimmedEmail}
+                              </a>
+                            );
+                          })}
                           {entry.phone && (
                             <a href={`tel:${entry.phone}`} className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800">
                               <Phone size={14} />
@@ -580,6 +637,7 @@ export default function JobTracker() {
                           )}
                         </div>
                       </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{entry.notes || '—'}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1 text-sm text-gray-600">
                           <Calendar size={14} />
@@ -629,7 +687,7 @@ export default function JobTracker() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                       <div className="flex flex-col items-center gap-2">
                         <Briefcase size={48} className="text-gray-200" />
                         <p className="text-lg font-medium">No entries found</p>
@@ -753,7 +811,7 @@ export default function JobTracker() {
                 <label className="text-sm font-semibold text-gray-700">Email</label>
                 <input
                   type="email"
-                  placeholder="john@example.com"
+                  placeholder="john@example.com, jane@example.com"
                   className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   value={formData.email}
                   onChange={(e) => handleFormChange('email', e.target.value)}
@@ -799,6 +857,17 @@ export default function JobTracker() {
                   className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   value={formData.interviewTime}
                   onChange={(e) => handleFormChange('interviewTime', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Notes</label>
+                <textarea
+                  rows={3}
+                  placeholder="Add notes..."
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={formData.notes}
+                  onChange={(e) => handleFormChange('notes', e.target.value)}
                 />
               </div>
 
