@@ -458,32 +458,35 @@ export default function JobTracker() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+    <div className="relative min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.22),_transparent_55%),radial-gradient(circle_at_15%_25%,_rgba(16,185,129,0.18),_transparent_45%),radial-gradient(circle_at_85%_20%,_rgba(244,114,182,0.2),_transparent_40%),radial-gradient(circle_at_70%_85%,_rgba(250,204,21,0.16),_transparent_45%)]"></div>
+      <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-indigo-500/20 blur-[120px]"></div>
+      <div className="absolute top-32 -right-44 h-[28rem] w-[28rem] rounded-full bg-emerald-500/20 blur-[140px]"></div>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="relative bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/95 border-b border-white/10 sticky top-0 z-10 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Briefcase className="text-white w-6 h-6" />
+            <div className="bg-gradient-to-br from-indigo-500/30 to-cyan-400/20 p-2 rounded-lg ring-1 ring-indigo-400/60 shadow-[0_0_20px_rgba(99,102,241,0.45)]">
+              <Briefcase className="text-cyan-100 w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">JobTracker</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-100">JobTracker</h1>
           </div>
           <div className="flex items-center gap-3">
-            <label className="cursor-pointer bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-sm">
+            <label className="cursor-pointer bg-white/5 border border-white/10 hover:border-cyan-400/50 text-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(15,23,42,0.35)] backdrop-blur">
               <Upload size={18} />
               <span>Import Excel</span>
               <input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleFileUpload} />
             </label>
             <button 
               onClick={exportToExcel}
-              className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-sm"
+              className="bg-white/5 border border-white/10 hover:border-emerald-400/50 text-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(15,23,42,0.35)] backdrop-blur"
             >
               <Download size={18} />
               <span>Export</span>
             </button>
             <button 
               onClick={() => { resetForm(); setEditingEntryId(null); setIsFormOpen(true); }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-sm"
+              className="bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-[0_10px_30px_rgba(59,130,246,0.45)]"
             >
               <Plus size={20} />
               <span>Add Entry</span>
@@ -492,23 +495,23 @@ export default function JobTracker() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {storageWarning && (
-          <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
+          <div className="mb-4 rounded-lg border border-amber-400/30 bg-amber-500/15 px-4 py-3 text-sm text-amber-100 shadow-[0_10px_30px_rgba(251,191,36,0.25)]">
             Storage warning: you are using about {storageUsage.kb} KB in localStorage. Consider exporting data if it grows large.
           </div>
         )}
-        <div className="mb-4 text-sm text-gray-600">
-          Total applications: <span className="font-semibold text-gray-900">{entries.length}</span>
+        <div className="mb-4 text-sm text-slate-300">
+          Total applications: <span className="font-semibold text-slate-100">{entries.length}</span>
         </div>
         {/* Filters & Search */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
+        <div className="bg-slate-900/70 p-4 rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.55)] border border-white/10 mb-6 flex flex-wrap gap-4 items-center justify-between backdrop-blur">
           <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
               placeholder="Search by full name, company, or position..." 
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-2 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400/60 focus:border-transparent transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -518,7 +521,7 @@ export default function JobTracker() {
             <select 
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              className="bg-slate-950/70 border border-white/10 text-slate-200 text-sm rounded-lg focus:ring-cyan-400/60 focus:border-cyan-400/60 block p-2.5"
             >
               <option value="">All Types</option>
               {typeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -526,7 +529,7 @@ export default function JobTracker() {
             <select 
               value={filterPosition}
               onChange={(e) => setFilterPosition(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              className="bg-slate-950/70 border border-white/10 text-slate-200 text-sm rounded-lg focus:ring-cyan-400/60 focus:border-cyan-400/60 block p-2.5"
             >
               <option value="">All Positions</option>
               {positionOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -534,7 +537,7 @@ export default function JobTracker() {
             <select 
               value={filterRemarks}
               onChange={(e) => setFilterRemarks(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              className="bg-slate-950/70 border border-white/10 text-slate-200 text-sm rounded-lg focus:ring-cyan-400/60 focus:border-cyan-400/60 block p-2.5"
             >
               <option value="">All Status</option>
               {remarkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -543,7 +546,7 @@ export default function JobTracker() {
               type="date"
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              className="bg-slate-950/70 border border-white/10 text-slate-200 text-sm rounded-lg focus:ring-cyan-400/60 focus:border-cyan-400/60 block p-2.5"
             />
             {(searchTerm || filterType || filterPosition || filterRemarks || filterDate) && (
               <button 
@@ -554,7 +557,7 @@ export default function JobTracker() {
                   setFilterRemarks('');
                   setFilterDate('');
                 }}
-                className="p-2.5 text-gray-500 hover:text-red-600 transition-colors"
+                className="p-2.5 text-slate-400 hover:text-rose-300 transition-colors"
                 title="Clear Filters"
               >
                 <X size={20} />
@@ -564,13 +567,13 @@ export default function JobTracker() {
         </div>
 
         {/* Table Container */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-slate-900/70 rounded-xl shadow-[0_30px_80px_rgba(15,23,42,0.6)] border border-white/10 overflow-hidden backdrop-blur">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
+                <tr className="bg-slate-950/70 border-b border-white/10">
                   <th 
-                    className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-white/5 transition-colors"
                     onClick={() => handleSort('companyName')}
                   >
                     <div className="flex items-center gap-1">
@@ -578,7 +581,7 @@ export default function JobTracker() {
                     </div>
                   </th>
                   <th 
-                    className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-white/5 transition-colors"
                     onClick={() => handleSort('location')}
                   >
                     <div className="flex items-center gap-1">
@@ -586,7 +589,7 @@ export default function JobTracker() {
                     </div>
                   </th>
                   <th 
-                    className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-white/5 transition-colors"
                     onClick={() => handleSort('jobType')}
                   >
                     <div className="flex items-center gap-1">
@@ -594,16 +597,16 @@ export default function JobTracker() {
                     </div>
                   </th>
                   <th 
-                    className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-white/5 transition-colors"
                     onClick={() => handleSort('fullName')}
                   >
                     <div className="flex items-center gap-1">
                       Full Name / Position {sortConfig.key === 'fullName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact</th>
                   <th 
-                    className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-white/5 transition-colors"
                     onClick={() => handleSort('date')}
                   >
                     <div className="flex items-center gap-1">
@@ -611,32 +614,32 @@ export default function JobTracker() {
                     </div>
                   </th>
                   <th 
-                    className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-white/5 transition-colors"
                     onClick={() => handleSort('remarks')}
                   >
                     <div className="flex items-center gap-1">
                       Remarks {sortConfig.key === 'remarks' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-white/5">
                 {filteredAndSortedEntries.length > 0 ? (
                   filteredAndSortedEntries.map((entry) => (
-                    <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={entry.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{entry.companyName}</p>
-                          <p className="text-sm text-gray-500">{entry.endClient || '—'}</p>
+                          <p className="text-sm font-medium text-slate-100">{entry.companyName}</p>
+                          <p className="text-sm text-slate-400">{entry.endClient || '—'}</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{entry.location || '—'}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{entry.jobType}</td>
+                      <td className="px-6 py-4 text-sm text-slate-300">{entry.location || '—'}</td>
+                      <td className="px-6 py-4 text-sm text-slate-300">{entry.jobType}</td>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{entry.fullName}</p>
-                          <p className="text-sm text-gray-500">{entry.position}</p>
+                          <p className="text-sm font-medium text-slate-100">{entry.fullName}</p>
+                          <p className="text-sm text-slate-400">{entry.position}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -648,7 +651,7 @@ export default function JobTracker() {
                               <a
                                 key={trimmedEmail}
                                 href={`mailto:${trimmedEmail}`}
-                                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                                className="flex items-center gap-1 text-sm text-cyan-300 hover:text-cyan-200"
                               >
                                 <Mail size={14} />
                                 {trimmedEmail}
@@ -656,7 +659,7 @@ export default function JobTracker() {
                             );
                           })}
                           {entry.phone && (
-                            <a href={`tel:${entry.phone}`} className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800">
+                            <a href={`tel:${entry.phone}`} className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200">
                               <Phone size={14} />
                               {entry.phone}
                             </a>
@@ -664,17 +667,16 @@ export default function JobTracker() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <Calendar size={14} />
+                        <div className="flex items-center gap-1 text-sm text-slate-300"><Calendar size={14} />
                           {formatDateDisplay(entry.date)}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          entry.remarks === 'Applied' ? 'bg-blue-100 text-blue-800' :
-                          entry.remarks === 'For Future Positions' ? 'bg-yellow-100 text-yellow-800' :
-                          entry.remarks === 'Followup' ? 'bg-purple-100 text-purple-800' :
-                          'bg-red-100 text-red-800'
+                          entry.remarks === 'Applied' ? 'bg-sky-500/20 text-sky-200 border border-sky-400/30' :
+                          entry.remarks === 'For Future Positions' ? 'bg-amber-500/20 text-amber-200 border border-amber-400/30' :
+                          entry.remarks === 'Followup' ? 'bg-fuchsia-500/20 text-fuchsia-200 border border-fuchsia-400/30' :
+                          'bg-rose-500/20 text-rose-200 border border-rose-400/30'
                         }`}>
                           {entry.remarks}
                         </span>
@@ -686,21 +688,21 @@ export default function JobTracker() {
                               href={entry.invitationLink} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-cyan-300 hover:text-cyan-200"
                               title="Open Invitation Link"
                             >
                               <LinkIcon size={16} />
                             </a>
                           )}
                           <button
-                            className="text-gray-400 hover:text-gray-600"
+                            className="text-slate-400 hover:text-slate-200"
                             title="Edit Entry"
                             onClick={() => handleEditEntry(entry)}
                           >
                             <Edit2 size={16} />
                           </button>
                           <button
-                            className="text-gray-400 hover:text-red-600"
+                            className="text-slate-400 hover:text-rose-300"
                             title="Delete Entry"
                             onClick={() => handleDeleteEntry(entry.id)}
                           >
@@ -712,11 +714,10 @@ export default function JobTracker() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                      <div className="flex flex-col items-center gap-2">
-                        <Briefcase size={48} className="text-gray-200" />
-                        <p className="text-lg font-medium">No entries found</p>
-                        <p className="text-sm">Start by adding your first job application tracking entry.</p>
+                    <td colSpan={8} className="px-6 py-12 text-center text-slate-400"><div className="flex flex-col items-center gap-2">
+                        <Briefcase size={48} className="text-slate-700" />
+                        <p className="text-lg font-medium text-slate-200">No entries found</p>
+                        <p className="text-sm text-slate-400">Start by adding your first job application tracking entry.</p>
                       </div>
                     </td>
                   </tr>
@@ -729,22 +730,22 @@ export default function JobTracker() {
 
       {/* Add Entry Modal (Simplified for UI step) */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h2 className="text-xl font-bold text-gray-900">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-950/90 text-slate-100 rounded-2xl shadow-[0_30px_80px_rgba(15,23,42,0.6)] border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-slate-950/90 z-10">
+              <h2 className="text-xl font-bold text-slate-100">
                 {editingEntryId ? 'Edit Job Entry' : 'Add New Job Entry'}
               </h2>
-              <button onClick={closeForm} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeForm} className="text-slate-400 hover:text-slate-200">
                 <X size={24} />
               </button>
             </div>
             
             <form className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleFormSubmit}>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Type</label>
+                <label className="text-sm font-semibold text-slate-300">Type</label>
                 <select
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.type}
                   onChange={(e) => handleFormChange('type', e.target.value)}
                 >
@@ -753,9 +754,9 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Source</label>
+                <label className="text-sm font-semibold text-slate-300">Source</label>
                 <select
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.source}
                   onChange={(e) => handleFormChange('source', e.target.value)}
                 >
@@ -764,20 +765,20 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                <label className="text-sm font-semibold text-slate-300">Full Name</label>
                 <input
                   type="text"
                   placeholder="John Doe"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.fullName}
                   onChange={(e) => handleFormChange('fullName', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Position</label>
+                <label className="text-sm font-semibold text-slate-300">Position</label>
                 <select
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.position}
                   onChange={(e) => handleFormChange('position', e.target.value)}
                 >
@@ -786,11 +787,11 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Company</label>
+                <label className="text-sm font-semibold text-slate-300">Company</label>
                 <input
                   type="text"
                   placeholder="Company name"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.companyName}
                   onChange={(e) => handleFormChange('companyName', e.target.value)}
                   required
@@ -798,20 +799,20 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">End Client</label>
+                <label className="text-sm font-semibold text-slate-300">End Client</label>
                 <input
                   type="text"
                   placeholder="End client name"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.endClient}
                   onChange={(e) => handleFormChange('endClient', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Job Type</label>
+                <label className="text-sm font-semibold text-slate-300">Job Type</label>
                 <select
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.jobType}
                   onChange={(e) => handleFormChange('jobType', e.target.value)}
                 >
@@ -820,9 +821,9 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Location</label>
+                <label className="text-sm font-semibold text-slate-300">Location</label>
                 <select
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.location}
                   onChange={(e) => handleFormChange('location', e.target.value)}
                 >
@@ -832,73 +833,73 @@ export default function JobTracker() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Email</label>
+                <label className="text-sm font-semibold text-slate-300">Email</label>
                 <input
                   type="email"
                   placeholder="john@example.com, jane@example.com"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.email}
                   onChange={(e) => handleFormChange('email', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Phone Number</label>
+                <label className="text-sm font-semibold text-slate-300">Phone Number</label>
                 <input
                   type="tel"
                   placeholder="+1 234 567 890"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.phone}
                   onChange={(e) => handleFormChange('phone', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Date</label>
+                <label className="text-sm font-semibold text-slate-300">Date</label>
                 <input
                   type="date"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.date}
                   onChange={(e) => handleFormChange('date', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Invitation Link</label>
+                <label className="text-sm font-semibold text-slate-300">Invitation Link</label>
                 <input
                   type="url"
                   placeholder="https://..."
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.invitationLink}
                   onChange={(e) => handleFormChange('invitationLink', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Interview Time</label>
+                <label className="text-sm font-semibold text-slate-300">Interview Time</label>
                 <input
                   type="time"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.interviewTime}
                   onChange={(e) => handleFormChange('interviewTime', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Notes</label>
+                <label className="text-sm font-semibold text-slate-300">Notes</label>
                 <textarea
                   rows={3}
                   placeholder="Add notes..."
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.notes}
                   onChange={(e) => handleFormChange('notes', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-gray-700">Remarks</label>
+                <label className="text-sm font-semibold text-slate-300">Remarks</label>
                 <select
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
                   value={formData.remarks}
                   onChange={(e) => handleFormChange('remarks', e.target.value)}
                 >
@@ -910,13 +911,13 @@ export default function JobTracker() {
                 <button 
                   type="button"
                   onClick={closeForm}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-white/10 text-slate-200 rounded-lg hover:bg-white/5 transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 text-white rounded-lg hover:from-indigo-400 hover:to-cyan-400 transition-colors shadow-[0_10px_30px_rgba(59,130,246,0.45)]"
                 >
                   {editingEntryId ? 'Update Entry' : 'Save Entry'}
                 </button>
@@ -928,3 +929,6 @@ export default function JobTracker() {
     </div>
   );
 }
+
+
+
