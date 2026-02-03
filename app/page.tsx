@@ -598,10 +598,10 @@ export default function JobTracker() {
                   </th>
                   <th 
                     className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-white/5 transition-colors"
-                    onClick={() => handleSort('location')}
+                    onClick={() => handleSort('vendorName')}
                   >
                     <div className="flex items-center gap-1">
-                      Location {sortConfig.key === 'location' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      Vendor Name {sortConfig.key === 'vendorName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                   </th>
                   <th 
@@ -650,7 +650,7 @@ export default function JobTracker() {
                           <p className="text-sm text-slate-400">{entry.endClient || '—'}</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-300">{entry.location || '—'}</td>
+                      <td className="px-6 py-4 text-sm text-slate-300">{entry.vendorName || '—'}</td>
                       <td className="px-6 py-4 text-sm text-slate-300">{entry.jobType}</td>
                       <td className="px-6 py-4">
                         <div>
@@ -957,6 +957,7 @@ export default function JobTracker() {
     </div>
   );
 }
+
 
 
 
