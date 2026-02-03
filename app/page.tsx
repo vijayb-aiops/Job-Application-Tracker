@@ -63,6 +63,7 @@ interface JobEntry {
   id: string;
   type: TypeOption;
   source: SourceType;
+  vendorName: string;
   fullName: string;
   companyName: string;
   endClient: string;
@@ -96,6 +97,7 @@ export default function JobTracker() {
   const [formData, setFormData] = useState({
     type: 'Vendor' as TypeOption,
     source: 'Indeed' as SourceType,
+    vendorName: '',
     fullName: '',
     companyName: '',
     endClient: '',
@@ -123,6 +125,7 @@ export default function JobTracker() {
           id: entry.id || crypto.randomUUID(),
           type: entry.type || entry.resource || 'Company',
           source: entry.source || 'Linkedin',
+          vendorName: entry.vendorName || '',
           fullName: entry.fullName || entry.name || '',
           companyName: entry.companyName || entry.company || '',
           endClient: entry.endClient || '',
@@ -282,6 +285,7 @@ export default function JobTracker() {
             id: crypto.randomUUID(),
             type: (row.Type || row.type || row.Resource || row.resource || 'Company') as TypeOption,
             source: (row.Source || row.source || 'Linkedin') as SourceType,
+            vendorName: row.VendorName || row.vendorName || '',
             fullName: (row['Full Name'] || row.fullName || row.Name || row.name || ''),
             companyName: (row.Company || row.company || row['Company Name'] || row.companyName || ''),
             endClient: (row.EndClient || row['End Client'] || row.endClient || ''),
@@ -321,6 +325,7 @@ export default function JobTracker() {
     setFormData({
       type: 'Vendor',
       source: 'Indeed',
+      vendorName: '',
       fullName: '',
       companyName: '',
       endClient: '',
@@ -361,6 +366,7 @@ export default function JobTracker() {
     const baseEntry = {
       type: formData.type,
       source: formData.source,
+      vendorName: formData.vendorName,
       fullName: trimmedFullName,
       companyName: trimmedCompanyName,
       endClient: formData.endClient.trim(),
@@ -396,6 +402,7 @@ export default function JobTracker() {
     setFormData({
       type: entry.type,
       source: entry.source,
+      vendorName: entry.vendorName,
       fullName: entry.fullName,
       companyName: entry.companyName,
       endClient: entry.endClient,
@@ -444,6 +451,15 @@ export default function JobTracker() {
     'Ottawa',
     'Missisauga',
     'Vancouver',
+  ];
+  const vendorNameOptions = [
+    'S.i. Systems',
+    'Robert Half Technology',
+    'Randstad Canada',
+    'Hays Canada',
+    'Vdart',
+    'DiamondPick',
+    'Epsilon',
   ];
   const remarkOptions: RemarkType[] = [
     'Applied',
@@ -761,6 +777,18 @@ export default function JobTracker() {
                   onChange={(e) => handleFormChange('source', e.target.value)}
                 >
                   {sourceOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-300">Vendor Name</label>
+                <select
+                  className="w-full p-2.5 border border-white/10 bg-slate-950/70 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-cyan-400/60 outline-none"
+                  value={formData.vendorName}
+                  onChange={(e) => handleFormChange('vendorName', e.target.value)}
+                >
+                  <option value="">Select vendor</option>
+                  {vendorNameOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
 
